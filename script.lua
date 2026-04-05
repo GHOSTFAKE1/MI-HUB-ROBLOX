@@ -1,131 +1,159 @@
--- HUB GOD ESP COMPACTO
+-- NOTIFICACIÓN AL EJECUTAR
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "EXECUTOR GHOST FAKE",
+        Text = "Hub cargado correctamente",
+        Duration = 5
+    })
+end)
+
+-- SERVICIOS
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
 
--- GUI principal
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "GhostHub"
+ScreenGui.Parent = game.CoreGui
+
+-- MENU
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0,250,0,350)  -- más pequeño
-Main.Position = UDim2.new(0.5,-125,0.5,-175)
+Main.Size = UDim2.new(0,250,0,330)
+Main.Position = UDim2.new(0.5,-125,0.5,-165)
 Main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Main.Active = true
 Main.Draggable = true
 
--- TopBar
-local TopBar = Instance.new("Frame", Main)
-TopBar.Size = UDim2.new(1,0,0,25)
-TopBar.BackgroundColor3 = Color3.fromRGB(0,255,150)
-local Title = Instance.new("TextLabel", TopBar)
-Title.Size = UDim2.new(1,-25,1,0)
-Title.Text = "HUB GOD ESP"
+-- TOP
+local Top = Instance.new("Frame", Main)
+Top.Size = UDim2.new(1,0,0,30)
+Top.BackgroundColor3 = Color3.fromRGB(0,255,150)
+
+local Title = Instance.new("TextLabel", Top)
+Title.Size = UDim2.new(1,0,1,0)
+Title.Text = "👻 GHOST HUB"
 Title.BackgroundTransparency = 1
 Title.TextColor3 = Color3.fromRGB(0,0,0)
 
--- Botón cerrar
-local CloseBtn = Instance.new("TextButton", TopBar)
-CloseBtn.Size = UDim2.new(0,25,1,0)
-CloseBtn.Position = UDim2.new(1,-25,0,0)
-CloseBtn.Text = "X"
-CloseBtn.BackgroundColor3 = Color3.fromRGB(255,0,0)
-CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false end)
+-- CERRAR
+local Close = Instance.new("TextButton", Top)
+Close.Size = UDim2.new(0,30,1,0)
+Close.Position = UDim2.new(1,-30,0,0)
+Close.Text = "X"
+Close.BackgroundColor3 = Color3.fromRGB(255,0,0)
 
--- Botón abrir
-local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size = UDim2.new(0,80,0,30)
-OpenBtn.Position = UDim2.new(0,10,0,200)
-OpenBtn.Text = "ABRIR"
-OpenBtn.BackgroundColor3 = Color3.fromRGB(0,255,150)
-OpenBtn.MouseButton1Click:Connect(function() Main.Visible = true end)
+Close.MouseButton1Click:Connect(function()
+    Main.Visible = false
+end)
 
--- Posición inicial botones
-local Y = 30
+-- ABRIR
+local Open = Instance.new("TextButton", ScreenGui)
+Open.Size = UDim2.new(0,90,0,30)
+Open.Position = UDim2.new(0,10,0,200)
+Open.Text = "ABRIR HUB"
+Open.BackgroundColor3 = Color3.fromRGB(0,255,150)
 
--- Función para crear botones en el menú
-local function crearBoton(nombre, accion)
-    local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(1,0,0,30)
-    btn.Position = UDim2.new(0,0,0,Y)
-    btn.Text = nombre
-    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.MouseButton1Click:Connect(accion)
+Open.MouseButton1Click:Connect(function()
+    Main.Visible = true
+end)
+
+-- CREAR BOTONES
+local Y = 40
+local function boton(nombre, func)
+    local b = Instance.new("TextButton", Main)
+    b.Size = UDim2.new(1,0,0,30)
+    b.Position = UDim2.new(0,0,0,Y)
+    b.Text = nombre
+    b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.MouseButton1Click:Connect(func)
     Y = Y + 35
 end
 
--- BOTONES ACTIVABLES
-crearBoton("Velocidad x2", function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+-- FUNCIONES
+
+-- Velocidad
+boton("⚡ Velocidad x2", function()
+    if LocalPlayer.Character then
         LocalPlayer.Character.Humanoid.WalkSpeed = 50
     end
 end)
 
-crearBoton("Super Salto", function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+-- Salto
+boton("🦘 Super Salto", function()
+    if LocalPlayer.Character then
         LocalPlayer.Character.Humanoid.JumpPower = 100
     end
 end)
 
-crearBoton("Resetear Personaje", function()
+-- Reset
+boton("💀 Resetear", function()
     if LocalPlayer.Character then
         LocalPlayer.Character:BreakJoints()
     end
 end)
 
--- ESP enemigos con botón
-local espActivado = false
-crearBoton("Activar ESP Enemigos", function()
-    espActivado = not espActivado
+-- CONTADOR
+local label = Instance.new("TextLabel", Main)
+label.Size = UDim2.new(1,0,0,30)
+label.Position = UDim2.new(0,0,0,Y)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.fromRGB(0,255,150)
+
+local function actualizar()
+    label.Text = "👥 Jugadores: "..#Players:GetPlayers()
+end
+
+actualizar()
+Players.PlayerAdded:Connect(actualizar)
+Players.PlayerRemoving:Connect(actualizar)
+
+Y = Y + 35
+
+-- ESP + NOMBRE
+local esp = false
+
+boton("👁 ESP Enemigos ON/OFF", function()
+    esp = not esp
+    
     for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            if espActivado then
-                -- Caja ESP
-                local Box = Instance.new("BoxHandleAdornment")
-                Box.Adornee = plr.Character:WaitForChild("HumanoidRootPart")
-                Box.Size = Vector3.new(4,6,1)
-                Box.Color3 = Color3.fromRGB(0,255,0)
-                Box.Transparency = 0.5
-                Box.AlwaysOnTop = true
-                Box.Name = "ESPBox"
-                Box.Parent = plr.Character:WaitForChild("HumanoidRootPart")
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            
+            if esp then
+                -- NOMBRE
+                local gui = Instance.new("BillboardGui", plr.Character.Head)
+                gui.Name = "ESP_NAME"
+                gui.Size = UDim2.new(0,100,0,40)
+                gui.AlwaysOnTop = true
                 
-                -- Nombre mini
-                local Billboard = Instance.new("BillboardGui", plr.Character:WaitForChild("HumanoidRootPart"))
-                Billboard.Size = UDim2.new(2,0,0.5,0)
-                Billboard.Adornee = plr.Character:HumanoidRootPart
-                Billboard.AlwaysOnTop = true
-                Billboard.Name = "ESPName"
-                local NameLabel = Instance.new("TextLabel", Billboard)
-                NameLabel.Size = UDim2.new(1,0,1,0)
-                NameLabel.BackgroundTransparency = 1
-                NameLabel.TextColor3 = Color3.fromRGB(0,255,150)
-                NameLabel.TextScaled = true
-                NameLabel.Text = plr.Name
+                local txt = Instance.new("TextLabel", gui)
+                txt.Size = UDim2.new(1,0,1,0)
+                txt.BackgroundTransparency = 1
+                txt.Text = plr.Name
+                txt.TextScaled = true
+                txt.TextColor3 = Color3.fromRGB(0,255,150)
+
+                -- CAJA
+                local box = Instance.new("BoxHandleAdornment")
+                box.Name = "ESP_BOX"
+                box.Adornee = plr.Character:FindFirstChild("HumanoidRootPart")
+                box.Size = Vector3.new(4,6,1)
+                box.Color3 = Color3.fromRGB(0,255,0)
+                box.AlwaysOnTop = true
+                box.Transparency = 0.5
+                box.Parent = plr.Character.HumanoidRootPart
+
             else
-                if plr.Character then
-                    local HRP = plr.Character:FindFirstChild("HumanoidRootPart")
-                    if HRP then
-                        local box = HRP:FindFirstChild("ESPBox")
-                        if box then box:Destroy() end
-                        local name = HRP:FindFirstChild("ESPName")
-                        if name then name:Destroy() end
-                    end
+                local head = plr.Character.Head
+                if head:FindFirstChild("ESP_NAME") then
+                    head.ESP_NAME:Destroy()
+                end
+                
+                local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+                if hrp and hrp:FindFirstChild("ESP_BOX") then
+                    hrp.ESP_BOX:Destroy()
                 end
             end
         end
     end
 end)
-
--- Contador jugadores
-local PlayersLabel = Instance.new("TextLabel", Main)
-PlayersLabel.Size = UDim2.new(1,0,0,30)
-PlayersLabel.Position = UDim2.new(0,0,0,Y)
-PlayersLabel.BackgroundTransparency = 1
-PlayersLabel.TextColor3 = Color3.fromRGB(0,255,150)
-
-local function actualizar()
-    PlayersLabel.Text = "Jugadores: "..#Players:GetPlayers()
-end
-actualizar()
-Players.PlayerAdded:Connect(actualizar)
-Players.PlayerRemoving:Connect(actualizar)
