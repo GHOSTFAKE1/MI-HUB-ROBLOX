@@ -1,175 +1,154 @@
--- // GHOST FAKE LOGIN + MENU COMPLETO // --
+-- // GHOST FAKE - LOGIN + MENU ULTRA //
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
-local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 
--- 🔑 CONFIG
-local PASSWORD = "GHOSTFAKE-172816381"
-local WA_LINK = "https://whatsapp.com/channel/0029VbCz7YTJkK7FktLjmn2K"
+-- =========================================
+-- 🔐 LOGIN (TU DISEÑO)
+-- =========================================
 
--- SONIDO
-local openSound = Instance.new("Sound", SoundService)
-openSound.SoundId = "rbxassetid://9118828565"
-openSound.Volume = 2
-
--- GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "GhostFakeUI"
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.Name = "GhostFakeLogin"
+gui.Parent = game.CoreGui
 
-pcall(function()
-    gui.Parent = game.CoreGui
-end)
-if not gui.Parent then
-    gui.Parent = LocalPlayer.PlayerGui
-end
-
--- =========================================
--- 🔐 LOGIN
--- =========================================
-local login = Instance.new("Frame", gui)
-login.Size = UDim2.new(0,300,0,200)
-login.Position = UDim2.new(0.5,-150,0.5,-100)
-login.BackgroundColor3 = Color3.fromRGB(0,0,0)
-login.BackgroundTransparency = 0.3
-
-local titleL = Instance.new("TextLabel", login)
-titleL.Size = UDim2.new(1,0,0,40)
-titleL.Text = "🔐 GHOST LOGIN"
-titleL.TextColor3 = Color3.fromRGB(0,255,255)
-titleL.BackgroundTransparency = 1
-
-local box = Instance.new("TextBox", login)
-box.Size = UDim2.new(0.8,0,0,40)
-box.Position = UDim2.new(0.1,0,0.3,0)
-box.PlaceholderText = "Contraseña..."
-
-local confirm = Instance.new("TextButton", login)
-confirm.Size = UDim2.new(0.35,0,0,40)
-confirm.Position = UDim2.new(0.1,0,0.65,0)
-confirm.Text = "CONFIRMAR"
-
-local wa = Instance.new("TextButton", login)
-wa.Size = UDim2.new(0.35,0,0,40)
-wa.Position = UDim2.new(0.55,0,0.65,0)
-wa.Text = "WHATSAPP"
-
--- =========================================
--- 💀 MENU (OCULTO HASTA LOGIN)
--- =========================================
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0,400,0,550)
-main.Position = UDim2.new(0.5,-200,0.5,-275)
-main.BackgroundColor3 = Color3.fromRGB(10,10,20)
-main.BackgroundTransparency = 0.2
-main.Visible = false
-main.ClipsDescendants = true
+main.Size = UDim2.new(0, 350, 0, 400)
+main.Position = UDim2.new(0.5, -175, 0.5, -200)
+main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+main.BackgroundTransparency = 0.1
 
-local outline = Instance.new("UIStroke", main)
-outline.Thickness = 3
-outline.Color = Color3.fromRGB(0,200,255)
+local border = Instance.new("UIStroke", main)
+border.Thickness = 3
+border.Color = Color3.fromRGB(255, 0, 0)
 
-local corner = Instance.new("UICorner", main)
-corner.CornerRadius = UDim.new(0,15)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 15)
 
--- BOTON FLOTANTE
-local toggle = Instance.new("TextButton", gui)
-toggle.Size = UDim2.new(0,60,0,60)
-toggle.Position = UDim2.new(0,10,0,180)
-toggle.Text = "🌑"
-
-local toggleStroke = Instance.new("UIStroke", toggle)
-toggleStroke.Color = Color3.fromRGB(0,170,255)
-
--- ABRIR / CERRAR
-local open = false
-toggle.MouseButton1Click:Connect(function()
-    open = not open
-    main.Visible = open
-    if open then openSound:Play() end
-end)
-
--- TITULO
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1,0,0,50)
-title.Text = "🌑 GHOST FAKE 🌑"
-title.BackgroundTransparency = 0.4
-title.TextColor3 = Color3.new(1,1,1)
+title.Size = UDim2.new(1,0,0,80)
+title.Text = "GHOST FAKE"
+title.TextColor3 = Color3.fromRGB(255,0,0)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 35
 
--- TABS
-local tabs = {"COMBAT","VISUAL","INFO","OTROS"}
-local frames = {}
+local passBox = Instance.new("TextBox", main)
+passBox.Size = UDim2.new(0.8,0,0,45)
+passBox.Position = UDim2.new(0.1,0,0,150)
+passBox.PlaceholderText = "Contraseña..."
 
-for i,v in pairs(tabs) do
-    local b = Instance.new("TextButton", main)
-    b.Size = UDim2.new(0.25,0,0,35)
-    b.Position = UDim2.new((i-1)*0.25,0,0,50)
-    b.Text = v
-    
-    frames[v] = Instance.new("Frame", main)
-    frames[v].Size = UDim2.new(1,0,0.75,0)
-    frames[v].Position = UDim2.new(0,0,0,88)
-    frames[v].BackgroundTransparency = 1
-    frames[v].Visible = false
+local status = Instance.new("TextLabel", main)
+status.Size = UDim2.new(1,0,0,25)
+status.Position = UDim2.new(0,0,0,200)
+status.BackgroundTransparency = 1
 
-    b.MouseButton1Click:Connect(function()
-        for _,f in pairs(frames) do f.Visible = false end
-        frames[v].Visible = true
-    end)
+local btn = Instance.new("TextButton", main)
+btn.Size = UDim2.new(0.8,0,0,45)
+btn.Position = UDim2.new(0.1,0,0,250)
+btn.Text = "CONFIRMAR"
+
+local correctPass = "GHOSTFAKE-172816381"
+
+-- =========================================
+-- 💀 FUNCION QUE CREA EL MENU
+-- =========================================
+
+local function AbrirMenu()
+
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+
+    local LocalPlayer = Players.LocalPlayer
+
+    local Gui = Instance.new("ScreenGui")
+    Gui.Name = "GhostFakeUI"
+    Gui.Parent = game.CoreGui
+
+    local Main = Instance.new("Frame", Gui)
+    Main.Size = UDim2.new(0, 450, 0, 620)
+    Main.Position = UDim2.new(0.5, -225, 0.5, -310)
+    Main.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    Main.BackgroundTransparency = 0.1
+    Main.Active = true
+    Main.Draggable = true
+
+    local Border = Instance.new("UIStroke", Main)
+    Border.Thickness = 5
+
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0,25)
+
+    -- TITULO
+    local Title = Instance.new("TextLabel", Main)
+    Title.Size = UDim2.new(1,0,0,60)
+    Title.Text = "🔥 GHOST FAKE 🔥"
+    Title.BackgroundTransparency = 1
+    Title.TextColor3 = Color3.new(1,1,1)
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 28
+
+    -- TABS
+    local tabs = {"COMBAT","VISUAL","HABILIDADES","EXTRAS"}
+    local frames = {}
+
+    for i,v in pairs(tabs) do
+        local b = Instance.new("TextButton", Main)
+        b.Size = UDim2.new(0.25,0,0,40)
+        b.Position = UDim2.new((i-1)*0.25,0,0,70)
+        b.Text = v
+
+        frames[v] = Instance.new("Frame", Main)
+        frames[v].Size = UDim2.new(1,0,0.7,0)
+        frames[v].Position = UDim2.new(0,0,0,120)
+        frames[v].Visible = false
+
+        b.MouseButton1Click:Connect(function()
+            for _,f in pairs(frames) do f.Visible = false end
+            frames[v].Visible = true
+        end)
+    end
+
+    frames["COMBAT"].Visible = true
+
+    -- EJEMPLO BOTONES
+    local function AddBtn(tab, txt)
+        local b = Instance.new("TextButton", frames[tab])
+        b.Size = UDim2.new(0.8,0,0,40)
+        b.Position = UDim2.new(0.1,0,0, (#frames[tab]:GetChildren()*45))
+        b.Text = txt
+    end
+
+    AddBtn("COMBAT","💥 AUTO PUNCH")
+    AddBtn("COMBAT","🛡️ GOD MODE")
+    AddBtn("VISUAL","📦 ESP")
+    AddBtn("VISUAL","🚀 FLY")
+
 end
 
-frames["COMBAT"].Visible = true
-
 -- =========================================
--- 🔘 FUNCIONES LOGIN
+-- 🔘 LOGIN LOGICA
 -- =========================================
 
--- CONFIRMAR
-confirm.MouseButton1Click:Connect(function()
-    if box.Text == PASSWORD then
+btn.MouseButton1Click:Connect(function()
+    if passBox.Text == correctPass then
         
-        login.Visible = false
-        main.Visible = true
-        open = true
-        
-        openSound:Play()
+        status.Text = "✅ ACCESO PERMITIDO"
+        status.TextColor3 = Color3.fromRGB(0,255,0)
 
-        pcall(function()
-            StarterGui:SetCore("SendNotification",{
-                Title="✔ Correcto",
-                Text="Bienvenido GHOST",
-                Duration=3
-            })
+        local tween = TweenService:Create(main, TweenInfo.new(0.5), {
+            Position = UDim2.new(0.5, -175, 1, 0),
+            BackgroundTransparency = 1
+        })
+        tween:Play()
+
+        tween.Completed:Connect(function()
+            gui:Destroy()
+            AbrirMenu() -- 🔥 AQUI SE ABRE TU MENU
         end)
 
     else
-        box.Text = ""
-        box.PlaceholderText = "❌ CONTRASEÑA INVALIDA"
-
-        StarterGui:SetCore("SendNotification",{
-            Title="❌ Error",
-            Text="Contraseña incorrecta",
-            Duration=3
-        })
+        status.Text = "❌ CONTRASEÑA INVALIDA"
+        status.TextColor3 = Color3.fromRGB(255,0,0)
     end
-end)
-
--- WHATSAPP
-wa.MouseButton1Click:Connect(function()
-    if setclipboard then
-        setclipboard(WA_LINK)
-    elseif toclipboard then
-        toclipboard(WA_LINK)
-    end
-
-    StarterGui:SetCore("SendNotification",{
-        Title="📋 Copiado",
-        Text="Copiado correctamente",
-        Duration=3
-    })
 end)
