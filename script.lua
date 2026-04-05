@@ -1,11 +1,11 @@
--- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK // --
+-- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK (INTENTO DE FIX PARA EXECUTOR) // --
 
--- NOTIFICACION
+-- NOTIFICACION DE CARGA
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "✓ CARGADO",
-        Text = "GHOST FAKE 💀 (Script Mega Completo Activo)",
-        Duration = 3
+        Text = "GHOST FAKE 💀 (Inyectando GUI...) Por favor, espera.",
+        Duration = 5
     })
 end)
 
@@ -15,17 +15,23 @@ local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
 
+-- Esperar hasta que el PlayerGui esté disponible
+while not LocalPlayer.PlayerGui do
+    task.wait(0.1)
+end
+
 -- SONIDO
 local openSound = Instance.new("Sound", SoundService)
 openSound.SoundId = "rbxassetid://9118828565"
 openSound.Volume = 2
 
--- GUI
-local gui = Instance.new("ScreenGui", game.CoreGui)
+-- GUI (AHORA EN PLAYERGUI)
+local gui = Instance.new("ScreenGui") -- Se crea sin padre
+gui.Name = "GhostFakeUI"
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
 -- BOTON FLOTANTE
-local toggle = Instance.new("TextButton", gui)
+local toggle = Instance.new("TextButton")
 toggle.Size = UDim2.new(0,55,0,55)
 toggle.Position = UDim2.new(0,15,0,200)
 toggle.BackgroundColor3 = Color3.fromRGB(10,10,10)
@@ -42,13 +48,15 @@ local toggleStroke = Instance.new("UIStroke", toggle)
 toggleStroke.Thickness = 2
 toggleStroke.Color = Color3.fromRGB(0,170,255)
 
+toggle.Parent = gui -- Asignar padre después de definir propiedades
+
 -- MENU PRINCIPAL
-local main = Instance.new("Frame", gui)
+local main = Instance.new("Frame")
 main.Size = UDim2.new(0,280,0,450) -- Aumentamos el tamaño para más botones
 main.Position = UDim2.new(0.5,-140,0.5,-225) -- Centrar
 main.BackgroundColor3 = Color3.fromRGB(15,15,25)
 main.BackgroundTransparency = 0.35 -- TRANSPARENCIA
-main.Visible = false
+main.Visible = false -- Inicialmente invisible
 main.Draggable = true
 main.ClipsDescendants = true
 
@@ -70,15 +78,29 @@ gradient.Color = ColorSequence.new({
 gradient.Rotation = 45
 gradient.Transparency = NumberSequence.new(0.85)
 
--- ABRIR AUTO
+main.Parent = gui -- Asignar padre después de definir propiedades
+
+gui.Parent = LocalPlayer.PlayerGui -- Finalmente, añadir la ScreenGui a PlayerGui
+
+-- LÓGICA DE ABRIR/CERRAR MENÚ
+local menuOpen = false
+
+local function setMenuVisibility(isVisible)
+    menuOpen = isVisible
+    main.Visible = isVisible
+    if isVisible then
+        pcall(function() openSound:Play() end)
+    end
+end
+
+-- Abrir automáticamente al cargar (después de 2 segundos)
 task.delay(2,function()
-    main.Visible = true
-    openSound:Play()
+    setMenuVisibility(true)
 end)
 
+-- Conectar el botón flotante para alternar visibilidad
 toggle.MouseButton1Click:Connect(function()
-    main.Visible = not main.Visible
-    if main.Visible then openSound:Play() end
+    setMenuVisibility(not menuOpen)
 end)
 
 -- TITULO
@@ -98,6 +120,7 @@ local frames = {}
 
 for i,v in pairs(tabs) do
     local b = Instance.new("TextButton", main)
+    b.Name = v .. "TabButton" -- Nombre único para el botón
     b.Size = UDim2.new(0.25,0,0,30)
     b.Position = UDim2.new((i-1)*0.25,0,0,40)
     b.Text = v
@@ -111,6 +134,7 @@ for i,v in pairs(tabs) do
     tabCorner.CornerRadius = UDim.new(0,5)
 
     frames[v] = Instance.new("Frame", main)
+    frames[v].Name = v .. "Frame" -- Nombre único para el frame
     frames[v].Size = UDim2.new(1,0,0.78,0) -- Ajustamos el tamaño para más botones
     frames[v].Position = UDim2.new(0,0,0,72)
     frames[v].BackgroundTransparency = 1
@@ -122,7 +146,7 @@ for i,v in pairs(tabs) do
     end)
 end
 
-frames["COMBAT"].Visible = true
+frames["COMBAT"].Visible = true -- Mostrar la primera pestaña por defecto
 
 -- FUNCION BOTON
 local function btn(parent,text,y,func)
@@ -246,33 +270,55 @@ local fovVisualEnabled = false
 local fovRadius = 50 -- Radio inicial del FOV visual
 local currentThemeColor = Color3.fromRGB(0,200,255) -- Color inicial del tema
 
+-- FUNCIÓN PARA OBTENER EL JUGADOR MÁS CERCANO
+local function getClosestPlayer(range)
+    local lpChar = LocalPlayer.Character
+    if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
+    local lpPos = lpChar.HumanoidRootPart.Position
+
+    local closestPlayer = nil
+    local minDistance = range
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+            local targetPos = player.Character.HumanoidRootPart.Position
+            local distance = (lpPos - targetPos).magnitude
+            if distance < minDistance then
+                minDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+    return closestPlayer
+end
+
 -- ======== COMBAT ========
 local y=10
 
 btn(frames["COMBAT"],"⚡ Velocidad +",y,function()
     speed = math.min(speed+5,120)
-    if LocalPlayer.Character then
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = speed
     end
 end) y=y+35
 
 btn(frames["COMBAT"],"⚡ Velocidad -",y,function()
     speed = math.max(speed-5,16)
-    if LocalPlayer.Character then
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = speed
     end
 end) y=y+35
 
 btn(frames["COMBAT"],"🦘 Salto +",y,function()
     jump = jump +15
-    if LocalPlayer.Character then
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.JumpPower = jump
     end
 end) y=y+35
 
 btn(frames["COMBAT"],"🦘 Salto -",y,function()
     jump = math.max(jump-15,50)
-    if LocalPlayer.Character then
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.JumpPower = jump
     end
 end) y=y+35
@@ -289,43 +335,3 @@ end) y=y+35
 slider(frames["COMBAT"], "Radio Hitbox", y, 5, 100, hitboxRadius, function(value)
     hitboxRadius = value
 end) y=y+45
-
-btn(frames["COMBAT"],"⚔️ AUTO ATAQUE ON/OFF",y,function()
-    autoAttackEnabled = not autoAttackEnabled
-    if autoAttackEnabled then
-        game.StarterGui:SetCore("SendNotification", {Text = "AUTO ATAQUE ACTIVADO", Duration = 1})
-        task.spawn(function()
-            while autoAttackEnabled do
-                task.wait(0.1)
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.Health > 0 then
-                    local target = nil
-                    local closestDistance = hitboxRadius + 10 -- Rango un poco más grande para autoattack
-
-                    for _, player in pairs(Players:GetPlayers()) do
-                        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-                            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
-                            if distance < closestDistance then
-                                closestDistance = distance
-                                target = player.Character.HumanoidRootPart
-                            end
-                        end
-                    end
-
-                    if target then
-                        local mouse = LocalPlayer:GetMouse()
-                        mouse.Hit = target.CFrame
-                        -- Simular un click, esto depende mucho de cómo el juego detecta ataques
-                        UserInputService:SimulateKeyPress(Enum.KeyCode.ButtonR2) -- Ejemplo de click
-                        UserInputService:SimulateButton1Click() -- Otro ejemplo de click
-                    end
-                end
-            end
-        end)
-    else
-        game.StarterGui:SetCore("SendNotification", {Text = "AUTO ATAQUE DESACTIVADO", Duration = 1})
-    end
-end) y=y+35
-
-btn(frames["COMBAT"],"🚜 AUTO FARM ON/OFF",y,function()
-
-        
