@@ -1,10 +1,10 @@
--- // GHOST FAKE - STYLE CYBER // --
+-- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK // --
 
 -- NOTIFICACION
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "✓ CARGADO",
-        Text = "GHOST FAKE 💀",
+        Text = "GHOST FAKE 💀 (Script Mega Completo Activo)",
         Duration = 3
     })
 end)
@@ -13,6 +13,7 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
 
 -- SONIDO
 local openSound = Instance.new("Sound", SoundService)
@@ -43,8 +44,8 @@ toggleStroke.Color = Color3.fromRGB(0,170,255)
 
 -- MENU PRINCIPAL
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0,280,0,380)
-main.Position = UDim2.new(0.5,-140,0.5,-190)
+main.Size = UDim2.new(0,280,0,450) -- Aumentamos el tamaño para más botones
+main.Position = UDim2.new(0.5,-140,0.5,-225) -- Centrar
 main.BackgroundColor3 = Color3.fromRGB(15,15,25)
 main.BackgroundTransparency = 0.35 -- TRANSPARENCIA
 main.Visible = false
@@ -110,7 +111,7 @@ for i,v in pairs(tabs) do
     tabCorner.CornerRadius = UDim.new(0,5)
 
     frames[v] = Instance.new("Frame", main)
-    frames[v].Size = UDim2.new(1,0,0.70,0)
+    frames[v].Size = UDim2.new(1,0,0.78,0) -- Ajustamos el tamaño para más botones
     frames[v].Position = UDim2.new(0,0,0,72)
     frames[v].BackgroundTransparency = 1
     frames[v].Visible = false
@@ -137,13 +138,113 @@ local function btn(parent,text,y,func)
     local btnCorner = Instance.new("UICorner", b)
     btnCorner.CornerRadius = UDim.new(0,6)
     b.MouseButton1Click:Connect(func)
+    return b
 end
 
--- VARIABLES
+-- FUNCION SLIDER (Deslizador)
+local function slider(parent, text, y, minVal, maxVal, initialVal, func)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(0.92,0,0,40)
+    frame.Position = UDim2.new(0.04,0,0,y)
+    frame.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1,0,0,20)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(150,220,255)
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Text = text .. ": " .. initialVal
+
+    local sliderFrame = Instance.new("Frame", frame)
+    sliderFrame.Size = UDim2.new(1,0,0,10)
+    sliderFrame.Position = UDim2.new(0,0,0,25)
+    sliderFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    local sliderCorner = Instance.new("UICorner", sliderFrame)
+    sliderCorner.CornerRadius = UDim.new(0,5)
+
+    local fill = Instance.new("Frame", sliderFrame)
+    fill.Size = UDim2.new((initialVal-minVal)/(maxVal-minVal),0,1,0)
+    fill.BackgroundColor3 = Color3.fromRGB(0,200,255)
+    local fillCorner = Instance.new("UICorner", fill)
+    fillCorner.CornerRadius = UDim.new(0,5)
+
+    local currentVal = initialVal
+
+    local function updateValue(input)
+        local pos = input.Position.X - sliderFrame.AbsolutePosition.X
+        local ratio = math.clamp(pos / sliderFrame.AbsoluteSize.X, 0, 1)
+        currentVal = math.round(minVal + (maxVal - minVal) * ratio)
+        fill.Size = UDim2.new((currentVal-minVal)/(maxVal-minVal),0,1,0)
+        label.Text = text .. ": " .. currentVal
+        func(currentVal)
+    end
+
+    sliderFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            updateValue(input)
+            local mouse = LocalPlayer:GetMouse()
+            local connection
+            connection = mouse.Move:Connect(function()
+                updateValue(mouse)
+            end)
+            sliderFrame.InputEnded:Connect(function(input2)
+                if input2.UserInputType == Enum.UserInputType.MouseButton1 or input2.UserInputType == Enum.UserInputType.Touch then
+                    connection:Disconnect()
+                end
+            end)
+        end
+    end)
+    return frame
+end
+
+-- FUNCION INPUT FIELD
+local function inputField(parent, text, y, initialText, func)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(0.92,0,0,40)
+    frame.Position = UDim2.new(0.04,0,0,y)
+    frame.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1,0,0,20)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(150,220,255)
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Text = text
+
+    local textbox = Instance.new("TextBox", frame)
+    textbox.Size = UDim2.new(1,0,0,20)
+    textbox.Position = UDim2.new(0,0,0,20)
+    textbox.BackgroundColor3 = Color3.fromRGB(0,30,60)
+    textbox.BackgroundTransparency = 0.4
+    textbox.TextColor3 = Color3.fromRGB(255,255,255)
+    textbox.Font = Enum.Font.Gotham
+    textbox.TextSize = 13
+    textbox.Text = initialText
+    local tbCorner = Instance.new("UICorner", textbox)
+    tbCorner.CornerRadius = UDim.new(0,6)
+    textbox.FocusLost:Connect(function()
+        func(textbox.Text)
+    end)
+    return textbox
+end
+
+-- VARIABLES GLOBALES DEL SCRIPT
 local speed=16
 local jump=50
 local voice=false
 local espEnabled=false
+local hitboxEnabled=false
+local hitboxRadius = 25
+local autoAttackEnabled = false
+local autoFarmEnabled = false
+local flyEnabled = false
+local rotateSpeed = 10 -- Velocidad de giro inicial
+local antiDamageEnabled = false
+local fovVisualEnabled = false
+local fovRadius = 50 -- Radio inicial del FOV visual
+local currentThemeColor = Color3.fromRGB(0,200,255) -- Color inicial del tema
 
 -- ======== COMBAT ========
 local y=10
@@ -176,99 +277,55 @@ btn(frames["COMBAT"],"🦘 Salto -",y,function()
     end
 end) y=y+35
 
-btn(frames["COMBAT"],"🛡 Anti Caída",y,function()
-    task.spawn(function()
-        while true do
-            task.wait(0.2)
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                if LocalPlayer.Character.HumanoidRootPart.Position.Y < -100 then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0,100,0)
+btn(frames["COMBAT"],"🎯 Hitbox ON/OFF",y,function()
+    hitboxEnabled = not hitboxEnabled
+    if hitboxEnabled then
+        game.StarterGui:SetCore("SendNotification", {Text = "Hitbox ACTIVADO", Duration = 1})
+    else
+        game.StarterGui:SetCore("SendNotification", {Text = "Hitbox DESACTIVADO", Duration = 1})
+    end
+end) y=y+35
+
+slider(frames["COMBAT"], "Radio Hitbox", y, 5, 100, hitboxRadius, function(value)
+    hitboxRadius = value
+end) y=y+45
+
+btn(frames["COMBAT"],"⚔️ AUTO ATAQUE ON/OFF",y,function()
+    autoAttackEnabled = not autoAttackEnabled
+    if autoAttackEnabled then
+        game.StarterGui:SetCore("SendNotification", {Text = "AUTO ATAQUE ACTIVADO", Duration = 1})
+        task.spawn(function()
+            while autoAttackEnabled do
+                task.wait(0.1)
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.Health > 0 then
+                    local target = nil
+                    local closestDistance = hitboxRadius + 10 -- Rango un poco más grande para autoattack
+
+                    for _, player in pairs(Players:GetPlayers()) do
+                        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+                            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).magnitude
+                            if distance < closestDistance then
+                                closestDistance = distance
+                                target = player.Character.HumanoidRootPart
+                            end
+                        end
+                    end
+
+                    if target then
+                        local mouse = LocalPlayer:GetMouse()
+                        mouse.Hit = target.CFrame
+                        -- Simular un click, esto depende mucho de cómo el juego detecta ataques
+                        UserInputService:SimulateKeyPress(Enum.KeyCode.ButtonR2) -- Ejemplo de click
+                        UserInputService:SimulateButton1Click() -- Otro ejemplo de click
+                    end
                 end
             end
-        end
-    end)
-end)
-
--- COORDENADAS
-local coords = Instance.new("TextLabel", frames["COMBAT"])
-coords.Position = UDim2.new(0.04,0,0,y+40)
-coords.Size = UDim2.new(0.92,0,0,25)
-coords.BackgroundTransparency = 1
-coords.TextColor3 = Color3.fromRGB(150,220,255)
-coords.Font = Enum.Font.GothamBold
-coords.Text = "📍 Cargando..."
-
-RunService.RenderStepped:Connect(function()
-    if LocalPlayer.Character then
-        local p = LocalPlayer.Character.HumanoidRootPart.Position
-        coords.Text = "📍 X:"..math.floor(p.X).." Y:"..math.floor(p.Y).." Z:"..math.floor(p.Z)
+        end)
+    else
+        game.StarterGui:SetCore("SendNotification", {Text = "AUTO ATAQUE DESACTIVADO", Duration = 1})
     end
-end)
+end) y=y+35
 
--- ======== VISUAL ========
-btn(frames["VISUAL"],"👁 Activar ESP",10,function()
-    espEnabled = not espEnabled
-    if espEnabled then
-        game.StarterGui:SetCore("SendNotification", {Text = "ESP ACTIVADO", Duration = 1})
-    end
-end)
+btn(frames["COMBAT"],"🚜 AUTO FARM ON/OFF",y,function()
 
-btn(frames["VISUAL"],"💡 Modo Nocturno",45,function()
-    game.Lighting.Brightness = 0.2
-    game.Lighting.FogEnd = 10000
-end)
-
-btn(frames["VISUAL"],"☀️ Modo Diurno",80,function()
-    game.Lighting.Brightness = 2
-    game.Lighting.TimeOfDay = 14
-end)
-
--- ======== STATS ========
-local lblPlayers = Instance.new("TextLabel", frames["STATS"])
-lblPlayers.Size = UDim2.new(0.9,0,0,30)
-lblPlayers.Position = UDim2.new(0.05,0,0,10)
-lblPlayers.BackgroundTransparency = 1
-lblPlayers.TextColor3 = Color3.new(1,1,1)
-lblPlayers.Font = Enum.Font.GothamBold
-lblPlayers.Text = "👥 Jugadores: Cargando..."
-
-local lblFPS = Instance.new("TextLabel", frames["STATS"])
-lblFPS.Size = UDim2.new(0.9,0,0,30)
-lblFPS.Position = UDim2.new(0.05,0,0,50)
-lblFPS.BackgroundTransparency = 1
-lblFPS.TextColor3 = Color3.new(1,1,1)
-lblFPS.Font = Enum.Font.GothamBold
-lblFPS.Text = "⚡ FPS: --"
-
--- ACTUALIZAR STATS
-spawn(function()
-    while wait(1) do
-        lblPlayers.Text = "👥 Jugadores: "..#Players:GetPlayers()
-    end
-end)
-
-local fps=0
-RunService.RenderStepped:Connect(function()
-    fps=fps+1
-end)
-
-while wait(1) do
-    lblFPS.Text = "⚡ FPS: "..fps
-    fps=0
-end
-
--- ======== OTROS ========
-btn(frames["OTROS"],"🔊 Efecto de Voz",10,function()
-    local s = Instance.new("Sound", SoundService)
-    s.SoundId = "rbxassetid://9120289495"
-    s.Volume = 3
-    s:Play()
-end)
-
-btn(frames["OTROS"],"🚪 Ir al Spawn",45,function()
-    if LocalPlayer.Character then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0,50,0)
-    end
-end)
-
-print("✅ GHOST FAKE CARGADO - ESTILO AZUL")
+        
