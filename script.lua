@@ -1,11 +1,11 @@
--- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK (INTENTO DE FIX PARA EXECUTOR) // --
+-- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK // --
 
 -- NOTIFICACION DE CARGA
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "✓ CARGADO",
-        Text = "GHOST FAKE 💀 (Inyectando GUI...) Por favor, espera.",
-        Duration = 5
+        Text = "GHOST FAKE 💀 (Script Mega Completo Activo)",
+        Duration = 3
     })
 end)
 
@@ -14,6 +14,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
 -- Esperar hasta que el PlayerGui esté disponible
 while not LocalPlayer.PlayerGui do
@@ -270,27 +271,69 @@ local fovVisualEnabled = false
 local fovRadius = 50 -- Radio inicial del FOV visual
 local currentThemeColor = Color3.fromRGB(0,200,255) -- Color inicial del tema
 
--- FUNCIÓN PARA OBTENER EL JUGADOR MÁS CERCANO
-local function getClosestPlayer(range)
+-- FUNCIÓN PARA OBTENER EL JUGADOR MÁS CERCANO (O NPC)
+local function getClosestTarget(range, includeNPCs)
     local lpChar = LocalPlayer.Character
     if not lpChar or not lpChar:FindFirstChild("HumanoidRootPart") then return nil end
     local lpPos = lpChar.HumanoidRootPart.Position
 
-    local closestPlayer = nil
+    local closestTarget = nil
     local minDistance = range
 
+    -- Buscar jugadores
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
             local targetPos = player.Character.HumanoidRootPart.Position
             local distance = (lpPos - targetPos).magnitude
             if distance < minDistance then
                 minDistance = distance
-                closestPlayer = player
+                closestTarget = player.Character.HumanoidRootPart
             end
         end
     end
-    return closestPlayer
+
+    -- Buscar NPCs (si está activado el auto farm, por ejemplo)
+    if includeNPCs then
+        for _, descendant in pairs(Workspace:GetDescendants()) do
+            if descendant:IsA("Model") and descendant:FindFirstChild("Humanoid") and descendant:FindFirstChild("HumanoidRootPart") and descendant.Humanoid.Health > 0 then
+                -- Asegurarse de que no sea un jugador
+                if not Players:GetPlayerFromCharacter(descendant) then
+                    local targetPos = descendant.HumanoidRootPart.Position
+                    local distance = (lpPos - targetPos).magnitude
+                    if distance < minDistance then
+                        minDistance = distance
+                        closestTarget = descendant.HumanoidRootPart
+                    end
+                end
+            end
+        end
+    end
+
+    return closestTarget
 end
+
+-- Última posición válida para Anti Caída
+local lastSafePosition = nil
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    lastSafePosition = LocalPlayer.Character.HumanoidRootPart.CFrame
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    local hrp = character:WaitForChild("HumanoidRootPart")
+    lastSafePosition = hrp.CFrame
+end)
+
+-- Actualizar la última posición segura
+RunService.Stepped:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = LocalPlayer.Character.HumanoidRootPart
+        -- Solo actualiza si no estamos cayendo
+        if hrp.Velocity.Y > -5 then -- Ajusta este valor si es necesario
+            lastSafePosition = hrp.CFrame
+        end
+    end
+end)
+
 
 -- ======== COMBAT ========
 local y=10
@@ -316,22 +359,5 @@ btn(frames["COMBAT"],"🦘 Salto +",y,function()
     end
 end) y=y+35
 
-btn(frames["COMBAT"],"🦘 Salto -",y,function()
-    jump = math.max(jump-15,50)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.JumpPower = jump
-    end
-end) y=y+35
-
-btn(frames["COMBAT"],"🎯 Hitbox ON/OFF",y,function()
-    hitboxEnabled = not hitboxEnabled
-    if hitboxEnabled then
-        game.StarterGui:SetCore("SendNotification", {Text = "Hitbox ACTIVADO", Duration = 1})
-    else
-        game.StarterGui:SetCore("SendNotification", {Text = "Hitbox DESACTIVADO", Duration = 1})
-    end
-end) y=y+35
-
-slider(frames["COMBAT"], "Radio Hitbox", y, 5, 100, hitboxRadius, function(value)
-    hitboxRadius = value
-end) y=y+45
+btn(frames
+    
