@@ -1,11 +1,11 @@
--- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK // --
+-- // GHOST FAKE - SCRIPT MEGA COMPLETO CYBERPUNK (RE-INTENTO DE FIX PARA EXECUTOR) // --
 
 -- NOTIFICACION DE CARGA
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "✓ CARGADO",
-        Text = "GHOST FAKE 💀 (Script Mega Completo Activo)",
-        Duration = 3
+        Text = "GHOST FAKE 💀 (Iniciando GUI...) Por favor, espera.",
+        Duration = 5
     })
 end)
 
@@ -16,10 +16,8 @@ local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
--- Esperar hasta que el PlayerGui esté disponible
-while not LocalPlayer.PlayerGui do
-    task.wait(0.1)
-end
+-- Esperar hasta que el PlayerGui esté disponible de forma segura
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- SONIDO
 local openSound = Instance.new("Sound", SoundService)
@@ -27,7 +25,7 @@ openSound.SoundId = "rbxassetid://9118828565"
 openSound.Volume = 2
 
 -- GUI (AHORA EN PLAYERGUI)
-local gui = Instance.new("ScreenGui") -- Se crea sin padre
+local gui = Instance.new("ScreenGui")
 gui.Name = "GhostFakeUI"
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
@@ -49,7 +47,7 @@ local toggleStroke = Instance.new("UIStroke", toggle)
 toggleStroke.Thickness = 2
 toggleStroke.Color = Color3.fromRGB(0,170,255)
 
-toggle.Parent = gui -- Asignar padre después de definir propiedades
+toggle.Parent = gui -- Asignar padre
 
 -- MENU PRINCIPAL
 local main = Instance.new("Frame")
@@ -79,9 +77,25 @@ gradient.Color = ColorSequence.new({
 gradient.Rotation = 45
 gradient.Transparency = NumberSequence.new(0.85)
 
-main.Parent = gui -- Asignar padre después de definir propiedades
+main.Parent = gui -- Asignar padre
 
-gui.Parent = LocalPlayer.PlayerGui -- Finalmente, añadir la ScreenGui a PlayerGui
+-- Intentar asignar la ScreenGui a PlayerGui
+local success, errorMessage = pcall(function()
+    gui.Parent = playerGui
+end)
+
+if not success then
+    warn("Error al asignar GUI a PlayerGui:", errorMessage)
+    -- Si falla en PlayerGui, intentar con CoreGui como último recurso (poco probable que funcione)
+    pcall(function()
+        gui.Parent = game.CoreGui
+    end)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "⚠️ ADVERTENCIA",
+        Text = "La GUI no se pudo inyectar en PlayerGui. Intentando CoreGui (podría no funcionar).",
+        Duration = 7
+    })
+end
 
 -- LÓGICA DE ABRIR/CERRAR MENÚ
 local menuOpen = false
@@ -270,6 +284,8 @@ local antiDamageEnabled = false
 local fovVisualEnabled = false
 local fovRadius = 50 -- Radio inicial del FOV visual
 local currentThemeColor = Color3.fromRGB(0,200,255) -- Color inicial del tema
+local lastSafePosition = nil -- Para Anti Caída
+local isFalling = false -- Para Anti Caída
 
 -- FUNCIÓN PARA OBTENER EL JUGADOR MÁS CERCANO (O NPC)
 local function getClosestTarget(range, includeNPCs)
@@ -312,52 +328,7 @@ local function getClosestTarget(range, includeNPCs)
     return closestTarget
 end
 
--- Última posición válida para Anti Caída
-local lastSafePosition = nil
-if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    lastSafePosition = LocalPlayer.Character.HumanoidRootPart.CFrame
-end
-
-LocalPlayer.CharacterAdded:Connect(function(character)
-    local hrp = character:WaitForChild("HumanoidRootPart")
-    lastSafePosition = hrp.CFrame
-end)
-
--- Actualizar la última posición segura
-RunService.Stepped:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = LocalPlayer.Character.HumanoidRootPart
-        -- Solo actualiza si no estamos cayendo
-        if hrp.Velocity.Y > -5 then -- Ajusta este valor si es necesario
-            lastSafePosition = hrp.CFrame
-        end
-    end
-end)
-
-
--- ======== COMBAT ========
-local y=10
-
-btn(frames["COMBAT"],"⚡ Velocidad +",y,function()
-    speed = math.min(speed+5,120)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    end
-end) y=y+35
-
-btn(frames["COMBAT"],"⚡ Velocidad -",y,function()
-    speed = math.max(speed-5,16)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = speed
-    end
-end) y=y+35
-
-btn(frames["COMBAT"],"🦘 Salto +",y,function()
-    jump = jump +15
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.JumpPower = jump
-    end
-end) y=y+35
-
-btn(frames
+-- Inicializar lastSafePosition al inicio o al cargar el personaje
+if LocalPlayer.Character then
+    local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     
