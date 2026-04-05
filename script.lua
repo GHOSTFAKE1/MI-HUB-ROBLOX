@@ -1,231 +1,274 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
+-- // GHOST FAKE - STYLE CYBER // --
 
-local LocalPlayer = Players.LocalPlayer
-
---------------------------------------------------
--- CONFIG
---------------------------------------------------
-
-local aimbot = false
-local esp = false
-local follow = false
-local fov = 60
-
---------------------------------------------------
--- GUI
---------------------------------------------------
-
-local gui = Instance.new("ScreenGui", game.CoreGui)
-
--- BOTON LATERAL 💀
-local toggle = Instance.new("TextButton", gui)
-toggle.Size = UDim2.new(0,60,0,60)
-toggle.Position = UDim2.new(0,10,0.5,-30) -- LADO IZQUIERDO CENTRO
-toggle.BackgroundColor3 = Color3.fromRGB(0,0,0)
-toggle.Text = "💀"
-toggle.TextScaled = true
-toggle.Draggable = true
-
--- MENU GRANDE
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0,450,0,420)
-main.Position = UDim2.new(0.5,-225,0.5,-210)
-main.BackgroundColor3 = Color3.fromRGB(15,15,15)
-main.Visible = false
-
--- ANIMACION
-local function openMenu()
-	main.Visible = true
-	main.Size = UDim2.new(0,0,0,0)
-	TweenService:Create(main,TweenInfo.new(0.3),{Size=UDim2.new(0,450,0,420)}):Play()
-end
-
-local function closeMenu()
-	local t = TweenService:Create(main,TweenInfo.new(0.3),{Size=UDim2.new(0,0,0,0)})
-	t:Play()
-	t.Completed:Wait()
-	main.Visible = false
-end
-
-toggle.MouseButton1Click:Connect(function()
-	if main.Visible then closeMenu() else openMenu() end
+-- NOTIFICACION
+pcall(function()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "✓ CARGADO",
+        Text = "GHOST FAKE 💀",
+        Duration = 3
+    })
 end)
 
---------------------------------------------------
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+
+-- SONIDO
+local openSound = Instance.new("Sound", SoundService)
+openSound.SoundId = "rbxassetid://9118828565"
+openSound.Volume = 2
+
+-- GUI
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+
+-- BOTON FLOTANTE
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.new(0,55,0,55)
+toggle.Position = UDim2.new(0,15,0,200)
+toggle.BackgroundColor3 = Color3.fromRGB(10,10,10)
+toggle.BackgroundTransparency = 0.2
+toggle.Text = "🌑"
+toggle.TextScaled = true
+toggle.Draggable = true
+toggle.Font = Enum.Font.GothamBold
+
+local toggleCorner = Instance.new("UICorner", toggle)
+toggleCorner.CornerRadius = UDim.new(0,12)
+
+local toggleStroke = Instance.new("UIStroke", toggle)
+toggleStroke.Thickness = 2
+toggleStroke.Color = Color3.fromRGB(0,170,255)
+
+-- MENU PRINCIPAL
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0,280,0,380)
+main.Position = UDim2.new(0.5,-140,0.5,-190)
+main.BackgroundColor3 = Color3.fromRGB(15,15,25)
+main.BackgroundTransparency = 0.35 -- TRANSPARENCIA
+main.Visible = false
+main.Draggable = true
+main.ClipsDescendants = true
+
+-- BORDE BRILLOSO AZUL
+local outline = Instance.new("UIStroke", main)
+outline.Thickness = 2.5
+outline.Color = Color3.fromRGB(0,200,255)
+
+-- ESQUINAS REDONDEADAS
+local corner = Instance.new("UICorner", main)
+corner.CornerRadius = UDim.new(0,12)
+
+-- GRADIENTE DE FONDO
+local gradient = Instance.new("UIGradient", main)
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 100, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+})
+gradient.Rotation = 45
+gradient.Transparency = NumberSequence.new(0.85)
+
+-- ABRIR AUTO
+task.delay(2,function()
+    main.Visible = true
+    openSound:Play()
+end)
+
+toggle.MouseButton1Click:Connect(function()
+    main.Visible = not main.Visible
+    if main.Visible then openSound:Play() end
+end)
+
 -- TITULO
---------------------------------------------------
-
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1,0,0,50)
-title.Text = "GHOST FAKE 💀"
+title.Size = UDim2.new(1,0,0,40)
+title.Position = UDim2.new(0,0,0,0)
+title.Text = "🌑 GHOST FAKE 🌑"
 title.BackgroundColor3 = Color3.fromRGB(0,0,0)
-title.TextColor3 = Color3.fromRGB(0,255,150)
-title.TextScaled = true
+title.BackgroundTransparency = 0.5
+title.TextColor3 = Color3.fromRGB(0,200,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
 
---------------------------------------------------
 -- TABS
---------------------------------------------------
-
-local tabs = {"MAIN","ESP","INFO"}
+local tabs = {"COMBAT","VISUAL","STATS","OTROS"}
 local frames = {}
 
 for i,v in pairs(tabs) do
-	local b = Instance.new("TextButton", main)
-	b.Size = UDim2.new(0.33,0,0,40)
-	b.Position = UDim2.new((i-1)*0.33,0,0.12,0)
-	b.Text = v
-	b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    local b = Instance.new("TextButton", main)
+    b.Size = UDim2.new(0.25,0,0,30)
+    b.Position = UDim2.new((i-1)*0.25,0,0,40)
+    b.Text = v
+    b.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    b.BackgroundTransparency = 0.6
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 13
 
-	frames[v] = Instance.new("Frame", main)
-	frames[v].Size = UDim2.new(1,0,0.7,0)
-	frames[v].Position = UDim2.new(0,0,0.25,0)
-	frames[v].Visible = false
+    local tabCorner = Instance.new("UICorner", b)
+    tabCorner.CornerRadius = UDim.new(0,5)
 
-	b.MouseButton1Click:Connect(function()
-		for _,f in pairs(frames) do f.Visible=false end
-		frames[v].Visible=true
-	end)
+    frames[v] = Instance.new("Frame", main)
+    frames[v].Size = UDim2.new(1,0,0.70,0)
+    frames[v].Position = UDim2.new(0,0,0,72)
+    frames[v].BackgroundTransparency = 1
+    frames[v].Visible = false
+
+    b.MouseButton1Click:Connect(function()
+        for _,f in pairs(frames) do f.Visible=false end
+        frames[v].Visible=true
+    end)
 end
 
-frames["MAIN"].Visible = true
+frames["COMBAT"].Visible = true
 
---------------------------------------------------
 -- FUNCION BOTON
---------------------------------------------------
-
-local function btn(parent,text,y,callback)
-	local b = Instance.new("TextButton", parent)
-	b.Size = UDim2.new(0.9,0,0,35)
-	b.Position = UDim2.new(0.05,0,0,y)
-	b.Text = text
-	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	b.TextColor3 = Color3.fromRGB(0,255,150)
-	b.MouseButton1Click:Connect(callback)
+local function btn(parent,text,y,func)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(0.92,0,0,30)
+    b.Position = UDim2.new(0.04,0,0,y)
+    b.Text = text
+    b.BackgroundColor3 = Color3.fromRGB(0,30,60)
+    b.BackgroundTransparency = 0.4
+    b.TextColor3 = Color3.fromRGB(255,255,255)
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 13
+    local btnCorner = Instance.new("UICorner", b)
+    btnCorner.CornerRadius = UDim.new(0,6)
+    b.MouseButton1Click:Connect(func)
 end
 
---------------------------------------------------
--- MAIN TAB
---------------------------------------------------
+-- VARIABLES
+local speed=16
+local jump=50
+local voice=false
+local espEnabled=false
 
-local y = 10
+-- ======== COMBAT ========
+local y=10
 
-btn(frames["MAIN"],"🎯 AIMBOT NPC",y,function()
-	aimbot = not aimbot
-end)
-y=y+45
+btn(frames["COMBAT"],"⚡ Velocidad +",y,function()
+    speed = math.min(speed+5,120)
+    if LocalPlayer.Character then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    end
+end) y=y+35
 
-btn(frames["MAIN"],"🧲 AUTO FOLLOW",y,function()
-	follow = not follow
-end)
-y=y+45
+btn(frames["COMBAT"],"⚡ Velocidad -",y,function()
+    speed = math.max(speed-5,16)
+    if LocalPlayer.Character then
+        LocalPlayer.Character.Humanoid.WalkSpeed = speed
+    end
+end) y=y+35
 
---------------------------------------------------
--- ESP TAB
---------------------------------------------------
+btn(frames["COMBAT"],"🦘 Salto +",y,function()
+    jump = jump +15
+    if LocalPlayer.Character then
+        LocalPlayer.Character.Humanoid.JumpPower = jump
+    end
+end) y=y+35
 
-btn(frames["ESP"],"🧿 ESP ON/OFF",10,function()
-	esp = not esp
-end)
+btn(frames["COMBAT"],"🦘 Salto -",y,function()
+    jump = math.max(jump-15,50)
+    if LocalPlayer.Character then
+        LocalPlayer.Character.Humanoid.JumpPower = jump
+    end
+end) y=y+35
 
---------------------------------------------------
--- INFO TAB
---------------------------------------------------
-
-local info = Instance.new("TextLabel", frames["INFO"])
-info.Size = UDim2.new(1,0,0,40)
-
---------------------------------------------------
--- SLIDER FOV
---------------------------------------------------
-
-local label = Instance.new("TextLabel", frames["MAIN"])
-label.Position = UDim2.new(0,0,0,120)
-label.Size = UDim2.new(1,0,0,20)
-label.Text = "FOV: "..fov
-
-local bar = Instance.new("Frame", frames["MAIN"])
-bar.Position = UDim2.new(0.05,0,0,150)
-bar.Size = UDim2.new(0.9,0,0,10)
-bar.BackgroundColor3 = Color3.fromRGB(60,60,60)
-
-local fill = Instance.new("Frame", bar)
-fill.Size = UDim2.new(0.3,0,1,0)
-fill.BackgroundColor3 = Color3.fromRGB(0,255,150)
-
-local dragging = false
-
-bar.InputBegan:Connect(function(i)
-	if i.UserInputType.Name=="MouseButton1" then dragging=true end
+btn(frames["COMBAT"],"🛡 Anti Caída",y,function()
+    task.spawn(function()
+        while true do
+            task.wait(0.2)
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                if LocalPlayer.Character.HumanoidRootPart.Position.Y < -100 then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0,100,0)
+                end
+            end
+        end
+    end)
 end)
 
-bar.InputEnded:Connect(function()
-	dragging=false
-end)
-
---------------------------------------------------
--- SISTEMA
---------------------------------------------------
+-- COORDENADAS
+local coords = Instance.new("TextLabel", frames["COMBAT"])
+coords.Position = UDim2.new(0.04,0,0,y+40)
+coords.Size = UDim2.new(0.92,0,0,25)
+coords.BackgroundTransparency = 1
+coords.TextColor3 = Color3.fromRGB(150,220,255)
+coords.Font = Enum.Font.GothamBold
+coords.Text = "📍 Cargando..."
 
 RunService.RenderStepped:Connect(function()
-
-	local char = LocalPlayer.Character
-	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-	-- FOV slider
-	if dragging then
-		local m = LocalPlayer:GetMouse()
-		local pos = math.clamp((m.X-bar.AbsolutePosition.X)/bar.AbsoluteSize.X,0,1)
-		fill.Size = UDim2.new(pos,0,1,0)
-		fov = math.floor(10 + (200-10)*pos)
-		label.Text = "FOV: "..fov
-	end
-
-	-- INFO
-	local pos = char.HumanoidRootPart.Position
-	info.Text = "Players: "..#Players:GetPlayers()..
-	" | X:"..math.floor(pos.X).." Y:"..math.floor(pos.Y)
-
-	local closest = nil
-	local dist = fov
-
-	for _,v in pairs(workspace:GetChildren()) do
-		if v.Name=="Dummy" and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") then
-
-			local mag = (v.HumanoidRootPart.Position - pos).Magnitude
-
-			if mag < dist then
-				dist = mag
-				closest = v
-			end
-
-			-- ESP
-			if esp and not v:FindFirstChild("ESP") then
-				local bill = Instance.new("BillboardGui", v)
-				bill.Name = "ESP"
-				bill.Size = UDim2.new(0,100,0,40)
-				bill.AlwaysOnTop = true
-
-				local txt = Instance.new("TextLabel", bill)
-				txt.Size = UDim2.new(1,0,1,0)
-				txt.Text = v.Name
-				txt.TextColor3 = Color3.fromRGB(255,0,0)
-				txt.BackgroundTransparency = 1
-			end
-		end
-	end
-
-	-- AIMBOT
-	if aimbot and closest then
-		local cam = workspace.CurrentCamera
-		cam.CFrame = CFrame.new(cam.CFrame.Position, closest.HumanoidRootPart.Position)
-	end
-
-	-- FOLLOW
-	if follow and closest then
-		char.HumanoidRootPart.CFrame =
-		closest.HumanoidRootPart.CFrame * CFrame.new(0,0,5)
-	end
-
+    if LocalPlayer.Character then
+        local p = LocalPlayer.Character.HumanoidRootPart.Position
+        coords.Text = "📍 X:"..math.floor(p.X).." Y:"..math.floor(p.Y).." Z:"..math.floor(p.Z)
+    end
 end)
+
+-- ======== VISUAL ========
+btn(frames["VISUAL"],"👁 Activar ESP",10,function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        game.StarterGui:SetCore("SendNotification", {Text = "ESP ACTIVADO", Duration = 1})
+    end
+end)
+
+btn(frames["VISUAL"],"💡 Modo Nocturno",45,function()
+    game.Lighting.Brightness = 0.2
+    game.Lighting.FogEnd = 10000
+end)
+
+btn(frames["VISUAL"],"☀️ Modo Diurno",80,function()
+    game.Lighting.Brightness = 2
+    game.Lighting.TimeOfDay = 14
+end)
+
+-- ======== STATS ========
+local lblPlayers = Instance.new("TextLabel", frames["STATS"])
+lblPlayers.Size = UDim2.new(0.9,0,0,30)
+lblPlayers.Position = UDim2.new(0.05,0,0,10)
+lblPlayers.BackgroundTransparency = 1
+lblPlayers.TextColor3 = Color3.new(1,1,1)
+lblPlayers.Font = Enum.Font.GothamBold
+lblPlayers.Text = "👥 Jugadores: Cargando..."
+
+local lblFPS = Instance.new("TextLabel", frames["STATS"])
+lblFPS.Size = UDim2.new(0.9,0,0,30)
+lblFPS.Position = UDim2.new(0.05,0,0,50)
+lblFPS.BackgroundTransparency = 1
+lblFPS.TextColor3 = Color3.new(1,1,1)
+lblFPS.Font = Enum.Font.GothamBold
+lblFPS.Text = "⚡ FPS: --"
+
+-- ACTUALIZAR STATS
+spawn(function()
+    while wait(1) do
+        lblPlayers.Text = "👥 Jugadores: "..#Players:GetPlayers()
+    end
+end)
+
+local fps=0
+RunService.RenderStepped:Connect(function()
+    fps=fps+1
+end)
+
+while wait(1) do
+    lblFPS.Text = "⚡ FPS: "..fps
+    fps=0
+end
+
+-- ======== OTROS ========
+btn(frames["OTROS"],"🔊 Efecto de Voz",10,function()
+    local s = Instance.new("Sound", SoundService)
+    s.SoundId = "rbxassetid://9120289495"
+    s.Volume = 3
+    s:Play()
+end)
+
+btn(frames["OTROS"],"🚪 Ir al Spawn",45,function()
+    if LocalPlayer.Character then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0,50,0)
+    end
+end)
+
+print("✅ GHOST FAKE CARGADO - ESTILO AZUL")
