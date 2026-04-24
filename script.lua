@@ -1,136 +1,125 @@
--- ==============================================
--- 🚀 MENU PRINCIPAL CON HACKS
--- (Continuación y Expansión)
--- ==============================================
-function CargarMenuPrincipal()
-    local Gui = Instance.new("ScreenGui")
-    Gui.Name = "GhostFakeMain"
-    Gui.Parent = game.CoreGui
-    Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+--// CONFIG DEFAULT
+local hitboxSize = 6
+local hitboxColor = Color3.fromRGB(255,0,0)
+local enabled = false
 
-    local Main = Instance.new("Frame", Gui)
-    Main.Size = UDim2.new(0,450,0,620)
-    Main.Position = UDim2.new(0.5,-225,0.5,-310)
-    Main.BackgroundColor3 = Color3.fromRGB(0,0,0)
-    Main.BackgroundTransparency = 0.1
+--// GUI
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "HitboxMenu"
 
-    local Border = Instance.new("UIStroke", Main)
-    Border.Thickness = 5
-    Border.Color = Color3.new(1,1,1)
-    local Corner = Instance.new("UICorner", Main)
-    Corner.CornerRadius = UDim.new(0,25)
+-- BOTÓN ABRIR/CERRAR
+local toggleBtn = Instance.new("TextButton", gui)
+toggleBtn.Size = UDim2.new(0,100,0,40)
+toggleBtn.Position = UDim2.new(0,20,0,200)
+toggleBtn.Text = "MENU"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+toggleBtn.TextColor3 = Color3.new(1,1,1)
 
-    -- Título del Menú
-    local Title = Instance.new("TextLabel", Main)
-    Title.Size = UDim2.new(1,0,0,50)
-    Title.Position = UDim2.new(0,0,0,0)
-    Title.BackgroundTransparency = 1
-    Title.Text = "💜 PULSE HUB 💜"
-    Title.TextColor3 = Color3.fromRGB(200,50,255)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 30
+-- FRAME PRINCIPAL
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,250,0,250)
+frame.Position = UDim2.new(0,20,0,250)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.Visible = false
 
-    -- ScrollingFrame para los botones de funcionalidades
-    local FeaturesFrame = Instance.new("ScrollingFrame", Main)
-    FeaturesFrame.Size = UDim2.new(1, -20, 1, -70) -- Ajusta el tamaño para dejar espacio al título y bordes
-    FeaturesFrame.Position = UDim2.new(0, 10, 0, 60) -- Posición debajo del título
-    FeaturesFrame.BackgroundTransparency = 1
-    FeaturesFrame.ScrollBarThickness = 8
-    FeaturesFrame.CanvasSize = UDim2.new(0, 0, 0, 0) -- Se ajustará dinámicamente
+-- BOTÓN ACTIVAR HITBOX
+local hitboxBtn = Instance.new("TextButton", frame)
+hitboxBtn.Size = UDim2.new(0,200,0,40)
+hitboxBtn.Position = UDim2.new(0,25,0,20)
+hitboxBtn.Text = "Activar Hitbox"
+hitboxBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+hitboxBtn.TextColor3 = Color3.new(1,1,1)
 
-    local UIGrid = Instance.new("UIGridLayout", FeaturesFrame)
-    UIGrid.CellSize = UDim2.new(0, 200, 0, 50) -- Tamaño de cada botón
-    UIGrid.CellPadding = UDim2.new(0, 10, 0, 10) -- Espacio entre botones
-    UIGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    UIGrid.VerticalAlignment = Enum.VerticalAlignment.Top
-    UIGrid.StartCorner = Enum.StartCorner.TopLeft
+-- BOTÓN CAMBIAR COLOR
+local colorBtn = Instance.new("TextButton", frame)
+colorBtn.Size = UDim2.new(0,200,0,40)
+colorBtn.Position = UDim2.new(0,25,0,70)
+colorBtn.Text = "Cambiar Color"
+colorBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+colorBtn.TextColor3 = Color3.new(1,1,1)
 
-    -- Variables para el estado de los hacks (ejemplo)
-    local HitboxExpanderActive = false
-    local WalkSpeedActive = false
-    local JumpPowerActive = false
-    local AntiVoidActive = false
-    local KillAuraActive = false
+-- BOTÓN AUMENTAR TAMAÑO
+local sizeUp = Instance.new("TextButton", frame)
+sizeUp.Size = UDim2.new(0,95,0,40)
+sizeUp.Position = UDim2.new(0,25,0,120)
+sizeUp.Text = "+ Tamaño"
 
-    -- Función genérica para crear botones de toggle
-    local function CreateToggleButton(parent, text, initialState, toggleCallback)
-        local btn = Instance.new("TextButton", parent)
-        btn.Size = UDim2.new(0, 200, 0, 50)
-        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        btn.BackgroundTransparency = 0.2
-        btn.TextColor3 = Color3.new(1, 1, 1)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 18
-        btn.Text = text .. " " .. (initialState and "✅" or "❌")
+-- BOTÓN DISMINUIR TAMAÑO
+local sizeDown = Instance.new("TextButton", frame)
+sizeDown.Size = UDim2.new(0,95,0,40)
+sizeDown.Position = UDim2.new(0,130,0,120)
+sizeDown.Text = "- Tamaño"
 
-        local corn = Instance.new("UICorner", btn)
-        corn.CornerRadius = UDim.new(0, 8)
+-- TEXTO INFO
+local info = Instance.new("TextLabel", frame)
+info.Size = UDim2.new(0,200,0,40)
+info.Position = UDim2.new(0,25,0,170)
+info.Text = "Size: "..hitboxSize
+info.TextColor3 = Color3.new(1,1,1)
+info.BackgroundTransparency = 1
 
-        btn.MouseButton1Click:Connect(function()
-            initialState = not initialState
-            btn.Text = text .. " " .. (initialState and "✅" or "❌")
-            toggleCallback(initialState)
-        end)
-        return btn, initialState
-    end
-
-    -- FUNCIONES PARA LOS HACKS (EJEMPLO - AQUÍ IRÍA LA LÓGICA REAL)
-    local function ToggleHitboxExpander(active)
-        HitboxExpanderActive = active
-        print("Hitbox Expander: " .. (active and "Activado" or "Desactivado"))
-        -- Aquí iría la lógica real para activar/desactivar el hitbox expander
-    end
-
-    local function ToggleWalkSpeed(active)
-        WalkSpeedActive = active
-        print("WalkSpeed: " .. (active and "Activado" or "Desactivado"))
-        -- Aquí iría la lógica real para activar/desactivar el walkspeed
-    end
-    
-    local function ToggleJumpPower(active)
-        JumpPowerActive = active
-        print("JumpPower: " .. (active and "Activado" or "Desactivado"))
-        -- Aquí iría la lógica real para activar/desactivar el jump power
-    end
-
-    local function ToggleAntiVoid(active)
-        AntiVoidActive = active
-        print("Anti Void / Anti Fall: " .. (active and "Activado" or "Desactivado"))
-        -- Aquí iría la lógica real para activar/desactivar el anti void
-    end
-
-    local function ToggleKillAura(active)
-        KillAuraActive = active
-        print("Kill Aura: " .. (active and "Activado" or "Desactivado"))
-        -- Aquí iría la lógica real para activar/desactivar el kill aura
-    end
-
-    -- Creando los botones de funcionalidades
-    local btnHitbox, _ = CreateToggleButton(FeaturesFrame, "Hitbox Expander", HitboxExpanderActive, ToggleHitboxExpander)
-    local btnWalkSpeed, _ = CreateToggleButton(FeaturesFrame, "WalkSpeed", WalkSpeedActive, ToggleWalkSpeed)
-    local btnJumpPower, _ = CreateToggleButton(FeaturesFrame, "JumpPower", JumpPowerActive, ToggleJumpPower)
-    local btnAntiVoid, _ = CreateToggleButton(FeaturesFrame, "Anti Void", AntiVoidActive, ToggleAntiVoid)
-    local btnKillAura, _ = CreateToggleButton(FeaturesFrame, "Kill Aura", KillAuraActive, ToggleKillAura)
-    
-    -- Ajustar el CanvasSize del ScrollingFrame
-    FeaturesFrame.CanvasSize = UDim2.new(0, 0, 0, UIGrid.AbsoluteContentSize.Y)
-
-
-    -- Bucle para la animación del borde (si quieres mantenerlo)
-    spawn(function()
-        while wait(0.05) do
-            for i=0,1,0.01 do
-                Border.Color = Color3.fromHSV(i,1,1)
-                wait()
+--// FUNCION HITBOX
+function applyHitbox()
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            
+            if v.Character:FindFirstChild("FakeHitbox") then
+                v.Character.FakeHitbox:Destroy()
             end
-            -- Puedes añadir un bucle inverso para que vaya y venga si quieres un efecto "pulsante"
-            for i=1,0,-0.01 do
-                 Border.Color = Color3.fromHSV(i,1,1)
-                 wait()
+
+            if enabled then
+                local p = Instance.new("Part")
+                p.Name = "FakeHitbox"
+                p.Size = Vector3.new(hitboxSize, hitboxSize, hitboxSize)
+                p.Color = hitboxColor
+                p.Transparency = 0.5
+                p.Material = Enum.Material.ForceField
+                p.CanCollide = false
+
+                local weld = Instance.new("WeldConstraint")
+                weld.Part0 = p
+                weld.Part1 = v.Character.HumanoidRootPart
+                weld.Parent = p
+
+                p.Parent = v.Character
+                p.Position = v.Character.HumanoidRootPart.Position
             end
         end
-    end)
-    
-    -- El resto de tu script de login (la parte inicial)
-    -- ...
+    end
 end
+
+--// EVENTOS
+
+-- abrir/cerrar menú
+toggleBtn.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
+
+-- activar hitbox
+hitboxBtn.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    hitboxBtn.Text = enabled and "Desactivar Hitbox" or "Activar Hitbox"
+    applyHitbox()
+end)
+
+-- cambiar color (random pro)
+colorBtn.MouseButton1Click:Connect(function()
+    hitboxColor = Color3.fromRGB(math.random(0,255), math.random(0,255), math.random(0,255))
+    applyHitbox()
+end)
+
+-- tamaño +
+sizeUp.MouseButton1Click:Connect(function()
+    hitboxSize = hitboxSize + 1
+    info.Text = "Size: "..hitboxSize
+    applyHitbox()
+end)
+
+-- tamaño -
+sizeDown.MouseButton1Click:Connect(function()
+    if hitboxSize > 2 then
+        hitboxSize = hitboxSize - 1
+        info.Text = "Size: "..hitboxSize
+        applyHitbox()
+    end
+end)
