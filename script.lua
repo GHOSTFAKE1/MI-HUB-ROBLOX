@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ghost fake panel</title>
+<title>ghost fake</title>
 
 <style>
 body{
     margin:0;
-    background:#02030a;
+    background:#0b0f1a;
     font-family:Consolas, monospace;
     color:white;
     display:flex;
@@ -19,64 +19,49 @@ body{
 
 /* PANEL */
 .panel{
-    width:900px;
+    width:90%;
+    max-width:900px;
     height:520px;
-    background:rgba(20,20,30,0.6);
-    backdrop-filter: blur(12px);
+    background:rgba(0,170,255,0.25);
     border-radius:20px;
     display:flex;
     overflow:hidden;
-    box-shadow:0 0 30px #000;
+    border:1px solid rgba(255,255,255,0.1);
 }
 
-/* TOP BAR */
-.topbar{
+/* TOP */
+.top{
     position:absolute;
-    width:900px;
-    height:50px;
+    width:90%;
+    max-width:900px;
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    padding:0 15px;
+    padding:10px 15px;
 }
 
 .title{
-    font-size:18px;
+    font-weight:bold;
 }
 
 .subtitle{
-    font-size:11px;
-    opacity:0.6;
-}
-
-.icons{
-    display:flex;
-    gap:10px;
-}
-
-.icon{
-    cursor:pointer;
+    font-size:12px;
     opacity:0.7;
-}
-
-.icon:hover{
-    opacity:1;
 }
 
 /* SIDEBAR */
 .sidebar{
-    width:200px;
-    background:rgba(30,30,40,0.7);
-    padding-top:60px;
+    width:180px;
+    background:rgba(0,0,0,0.4);
+    padding-top:50px;
 }
 
-.menu{
-    padding:15px;
+.item{
+    padding:12px;
     cursor:pointer;
     opacity:0.7;
 }
 
-.menu.active{
+.item.active{
     background:rgba(255,255,255,0.1);
     opacity:1;
 }
@@ -84,7 +69,7 @@ body{
 /* MAIN */
 .main{
     flex:1;
-    padding:70px 30px 30px 30px;
+    padding:60px 20px;
 }
 
 /* SWITCH */
@@ -97,7 +82,7 @@ body{
 .toggle{
     width:40px;
     height:20px;
-    background:#444;
+    background:#333;
     border-radius:20px;
     position:relative;
     cursor:pointer;
@@ -124,33 +109,13 @@ body{
 }
 
 /* SLIDER */
-.slider{
+input[type=range]{
     width:100%;
 }
 
-.value{
+.small{
     font-size:12px;
     opacity:0.7;
-}
-
-/* BUTTONS */
-.presets{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
-
-.btn{
-    padding:10px;
-    background:#111;
-    border-radius:10px;
-    cursor:pointer;
-    flex:1;
-    text-align:center;
-}
-
-.btn:hover{
-    background:#222;
 }
 </style>
 </head>
@@ -159,33 +124,21 @@ body{
 
 <div class="panel">
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-        <div>
-            <div class="title">ghost fake</div>
-            <div class="subtitle">by hack</div>
-        </div>
-
-        <div class="icons">
-            <div class="icon">🔍</div>
-            <div class="icon">➖</div>
-            <div class="icon">⛶</div>
-            <div class="icon">❌</div>
-        </div>
-    </div>
-
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="menu">🎯 Hitboxes</div>
-        <div class="menu active">⚔️ Kill Aura</div>
-        <div class="menu">🛡️ Whitelist</div>
-        <div class="menu">👁️ Visual</div>
+        <div class="item">🎯 Hitboxes</div>
+        <div class="item active">⚔️ Kill Aura</div>
+        <div class="item">🛡️ Whitelist</div>
+        <div class="item">👁️ Visual</div>
     </div>
 
     <!-- MAIN -->
     <div class="main">
 
-        <h3>Kill Aura</h3>
+        <h2>ghost fake</h2>
+        <div class="small">by hack</div>
+
+        <hr>
 
         <div class="switch">
             Enable Kill Aura
@@ -198,31 +151,21 @@ body{
         </div>
 
         <div class="switch">
-            Sync with Hitbox
+            Sync Hitbox
             <div class="toggle"></div>
         </div>
 
         <br>
 
         Attack Range
-        <input type="range" min="1" max="20" value="8" class="slider" id="range">
-        <div class="value" id="rangeVal">8</div>
+        <input type="range" min="1" max="20" value="8" id="range">
+        <div class="small" id="rangeVal">8</div>
 
-        <br>
+        <br><br>
 
-        Attack Delay (sec)
-        <input type="range" min="0.01" max="0.1" step="0.005" value="0.03" class="slider" id="delay">
-        <div class="value" id="delayVal">0.03</div>
-
-        <br>
-
-        ⚡ Presets
-
-        <div class="presets">
-            <div class="btn" onclick="setDelay(0.03)">Fast</div>
-            <div class="btn" onclick="setDelay(0.045)">Medium</div>
-            <div class="btn" onclick="setDelay(0.06)">Slow</div>
-        </div>
+        Delay
+        <input type="range" min="0.01" max="0.1" step="0.01" value="0.03" id="delay">
+        <div class="small" id="delayVal">0.03</div>
 
     </div>
 
@@ -230,23 +173,17 @@ body{
 
 <script>
 
-/* TOGGLES */
+// TOGGLES
 document.querySelectorAll(".toggle").forEach(t=>{
-    t.onclick=()=> t.classList.toggle("active");
+    t.onclick=()=>t.classList.toggle("active");
 });
 
-/* SLIDERS */
-let range = document.getElementById("range");
-let delay = document.getElementById("delay");
+// SLIDERS
+let r=document.getElementById("range");
+let d=document.getElementById("delay");
 
-range.oninput = ()=> document.getElementById("rangeVal").innerText = range.value;
-delay.oninput = ()=> document.getElementById("delayVal").innerText = delay.value;
-
-/* PRESETS */
-function setDelay(val){
-    delay.value = val;
-    document.getElementById("delayVal").innerText = val;
-}
+r.oninput=()=>document.getElementById("rangeVal").innerText=r.value;
+d.oninput=()=>document.getElementById("delayVal").innerText=d.value;
 
 </script>
 
